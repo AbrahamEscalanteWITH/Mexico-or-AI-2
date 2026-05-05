@@ -52,6 +52,8 @@ function broadcastState() {
     totalQuestions: questionPool.length,
     scores: { ...gameState.scores },
     playerNames: { ...gameState.playerNames },
+    socketVotes: { ...gameState.socketVotes },
+    hasHost: !!gameState.hostId,
   };
   io.emit('gameState', stateToSend);
 }
@@ -147,9 +149,14 @@ io.on('connection', (socket) => {
 
   socket.on('nextQuestion', () => {
     if (gameState.status === 'results') {
-      gameState.currentQuestionIndex = (gameState.currentQuestionIndex + 1) % questionPool.length;
-      gameState.questionNumber += 1;
-      startNextRound();
+      if (gameState.questionNumber >= 20) {
+        gameState.status = 'game_over';
+        broadcastState();
+      } else {
+        gameState.currentQuestionIndex = (gameState.currentQuestionIndex + 1) % questionPool.length;
+        gameState.questionNumber += 1;
+        startNextRound();
+      }
     }
   });
 

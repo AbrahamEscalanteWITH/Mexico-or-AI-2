@@ -19,7 +19,7 @@ const questions = [
   },
   {
     id: 4,
-    description: "A prominent politician accidentally sits on his own testicle while giving a live television interview.",
+    description: "A prominent politician accidentally sits on his own nut while giving a live television interview.",
     isAI: false,
     video: '/media/Huevo.mp4'
   },
@@ -90,22 +90,22 @@ const questions = [
   },
   {
     id: 17,
-    description: "A heavily customized lowrider bouncing so high it accidentally gets its bumper stuck on an overhead pedestrian bridge.",
+    description: "Spiderman spotted performing intense parkour on the rooftops of an old Mexican neighborhood.",
     isAI: true
   },
   {
     id: 18,
-    description: "A man riding a wildly bucking mechanical bull that somehow broke loose and ended up in the middle of a town square.",
+    description: "Harry Potter trying to order a magic potion but accidentally buying an exotic spicy salsa from a street vendor.",
     isAI: true
   },
   {
     id: 19,
-    description: "A dramatic standoff between two rival botargas (mascots) of famous pharmacy chains dancing aggressively at each other.",
+    description: "Kanye West spotted eating a street taco from a very small local stand in Mexico City while sitting right next to Mario Bros.",
     isAI: true
   },
   {
     id: 20,
-    description: "A grandmother completely unbothered, knitting quietly on a bench while a massive street parade of fire-breathers passes by.",
+    description: "Dua Lipa casually singing a mariachi song alongside a local band in a tiny cantina without anyone noticing who she really is.",
     isAI: true
   }
 ];

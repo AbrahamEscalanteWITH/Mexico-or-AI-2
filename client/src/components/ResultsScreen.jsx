@@ -92,7 +92,7 @@ function ResultsScreen({ gameState, isHost, onNext, onNewGame, onVideoPlay, onVi
       {isHost ? (
         <div style={{ display:'flex', gap:'1rem', justifyContent:'center', marginTop:'2rem', flexWrap:'wrap' }}>
           <button className="btn-start-big" style={{ fontSize:'1.5rem', marginTop:0 }} onClick={onNext} id="next-question-btn">
-            Next Question ➡️
+            {questionNumber >= totalQuestions ? 'Finish Game 🏆' : 'Next Question ➡️'}
           </button>
           <button className="btn-ai" style={{ fontSize:'1.1rem', letterSpacing:'3px', padding:'0.7em 1.8em', marginTop:0 }} onClick={onNewGame} id="new-game-results-btn">
             🔄 New Game

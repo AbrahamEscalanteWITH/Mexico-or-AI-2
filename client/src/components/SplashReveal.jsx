@@ -1,15 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 
-function SplashReveal({ question, playSfx, socket }) {
+function SplashReveal({ question, playSfx, fadeSfx, socket }) {
   const isReal = !question.isAI;
   const videoRef = useRef(null);
 
   useEffect(() => {
     if (isReal) {
-      // Play winner sting when Mexico splash starts
-      playSfx('/audio/Sting del Ganador.mp3', 1.0);
+      playSfx('/audio/Sting del Ganador.mp3', 0.6); // Lowered volume to prevent clipping
     } else {
-      playSfx('/audio/Objetivo Alcanzado.mp3', 1.0);
+      playSfx('/audio/Objetivo Alcanzado.mp3', 0.8);
     }
   }, []);
 

@@ -44,6 +44,28 @@ export function useAudio() {
     audio.play().catch(() => {}); // ignore autoplay block
   }, []);
 
+  const fadeSfx = useCallback((src, duration = 1000) => {
+    const audio = getAudio(src);
+    if (audio.paused) return;
+    
+    const initialVolume = audio.volume;
+    const steps = 20;
+    const stepTime = duration / steps;
+    const volumeStep = initialVolume / steps;
+    
+    let currentStep = 0;
+    const fadeInterval = setInterval(() => {
+      currentStep++;
+      if (currentStep >= steps) {
+        clearInterval(fadeInterval);
+        audio.pause();
+        audio.currentTime = 0;
+      } else {
+        audio.volume = Math.max(0, initialVolume - (volumeStep * currentStep));
+      }
+    }, stepTime);
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -51,5 +73,5 @@ export function useAudio() {
     };
   }, []);
 
-  return { playBg, stopBg, playSfx };
+  return { playBg, stopBg, playSfx, fadeSfx };
 }

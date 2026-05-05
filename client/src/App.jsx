@@ -4,6 +4,7 @@ import Lobby from './components/Lobby'
 import VotingScreen from './components/VotingScreen'
 import ResultsScreen from './components/ResultsScreen'
 import SplashReveal from './components/SplashReveal'
+import WinnerScreen from './components/WinnerScreen'
 import { useAudio } from './hooks/useAudio'
 import './App.css'
 
@@ -12,11 +13,12 @@ const socket = io(serverUrl)
 
 function App() {
   const [gameState, setGameState] = useState({ status: 'connecting' })
-  const [role, setRole] = useState('unassigned')       // 'unassigned' | 'naming' | 'host' | 'player'
+  const [role, setRole] = useState('unassigned')       // 'unassigned' | 'naming' | 'host' | 'player' | 'host-auth'
   const [playerName, setPlayerName] = useState('')
   const [nameInput, setNameInput] = useState('')
+  const [hostPasswordInput, setHostPasswordInput] = useState('')
   const [musicVol, setMusicVol] = useState(0.25)
-  const { playSfx, stopBg } = useAudio()
+  const { playSfx, stopBg, fadeSfx } = useAudio()
   const prevStatusRef = useRef(null)
   const bgStarted = useRef(false)
   const bgAudioRef = useRef(null)
@@ -75,15 +77,36 @@ function App() {
       bgStarted.current = false
       startBg()
     }
+
+    if (curr === 'game_over' && prev !== 'game_over') {
+      if (bgAudioRef.current) bgAudioRef.current.pause()
+      bgStarted.current = false
+      playSfx('/audio/Tema del Ganador.mp3', 1.0)
+      
+      // Resume background music after 44 seconds
+      setTimeout(() => {
+        if (gameState.status === 'game_over' || prevStatusRef.current === 'game_over') {
+          startBg()
+        }
+      }, 44000)
+    }
   }, [gameState.status])
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handlePickHost = () => {
     startBg()
-    // Host gets name "Host" internally, no name screen needed
-    socket.emit('setName', { name: 'Host', isHost: true })
-    setPlayerName('Host')
-    setRole('host')
+    setRole('host-auth')
+  }
+
+  const handleHostAuthSubmit = (e) => {
+    e.preventDefault()
+    if (hostPasswordInput.toLowerCase() === 'becka') {
+      socket.emit('setName', { name: 'Host', isHost: true })
+      setPlayerName('Host')
+      setRole('host')
+    } else {
+      alert("Incorrect password!")
+    }
   }
 
   const handlePickPlayer = () => {
@@ -127,12 +150,11 @@ function App() {
 
   const Header = ({ showHostBadge = false }) => (
     <>
-      <div className="tv-channel-bar"><span>◈</span> CHANNEL 5 CDMX <span>◈</span> LIVE <span>◈</span></div>
+      <div className="tv-channel-bar"><span>◈</span> CANAL 5 CDMX <span>◈</span> LIVE <span>◈</span></div>
       <h1 className="main-title">
         Mexico<br/>or AI?
         {showHostBadge && <span className="host-badge">HOST</span>}
       </h1>
-      <p className="title-sub">The Truth Game</p>
     </>
   )
 
@@ -145,11 +167,56 @@ function App() {
           <h2>How are you playing?</h2>
           <div className="banner-strip">Select your role</div>
           <div className="role-selection">
-            <button className="btn-start-big" onClick={handlePickHost}>👑 &nbsp; I'm the Host</button>
+            {!gameState.hasHost && (
+              <button className="btn-start-big" onClick={handlePickHost}>👑 &nbsp; I'm the Host</button>
+            )}
             <button className="btn-mexico" style={{ fontSize: '1.4rem', letterSpacing: '3px', padding: '0.7em 2.5em' }} onClick={handlePickPlayer}>
               🎮 &nbsp; Join as Player
             </button>
           </div>
+          <div className="stars-row" style={{ marginTop: '1.5rem' }}>
+            {'★ ★ ★ ★ ★'.split(' ').map((s, i) => <span key={i}>{s}</span>)}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Host Authentication ───────────────────────────────────────────────────
+  if (role === 'host-auth') {
+    return (
+      <div className="app-container fade-enter fade-enter-active">
+        <Header />
+        <div className="card">
+          <h2>Host Authentication</h2>
+          <div className="banner-strip">Enter password</div>
+          <form onSubmit={handleHostAuthSubmit} style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+            <input
+              type="password"
+              autoFocus
+              placeholder="Password..."
+              value={hostPasswordInput}
+              onChange={e => setHostPasswordInput(e.target.value)}
+              style={{
+                background: 'rgba(255,255,255,0.07)',
+                border: '2px solid var(--rosa-mexicano)',
+                borderRadius: '4px',
+                padding: '0.6em 1.2em',
+                fontSize: '1.6rem',
+                fontFamily: "'Bebas Neue', sans-serif",
+                letterSpacing: '4px',
+                color: 'var(--amarillo-brillante)',
+                textAlign: 'center',
+                width: '100%',
+                maxWidth: '320px',
+                outline: 'none',
+              }}
+            />
+            <p style={{ color: 'var(--cyan-mexicano)', fontSize: '0.9rem', marginTop: '-0.5rem' }}>Hint: Name of your pet</p>
+            <button type="submit" className="btn-start-big" style={{ marginTop: 0 }}>
+              Unlock Host
+            </button>
+          </form>
           <div className="stars-row" style={{ marginTop: '1.5rem' }}>
             {'★ ★ ★ ★ ★'.split(' ').map((s, i) => <span key={i}>{s}</span>)}
           </div>
@@ -211,7 +278,7 @@ function App() {
       {isHost && <VolumeDial />}
 
       {gameState.status === 'revealing' && gameState.question && (
-        <SplashReveal question={gameState.question} playSfx={playSfx} socket={socket} />
+        <SplashReveal question={gameState.question} playSfx={playSfx} fadeSfx={fadeSfx} socket={socket} />
       )}
 
       <div className="app-container fade-enter fade-enter-active">
@@ -251,6 +318,15 @@ function App() {
             onVideoPlay={() => duckBg(0.05)}
             onVideoEnd={() => duckBg(musicVol)}
             socketId={socket.id}
+          />
+        )}
+
+        {gameState.status === 'game_over' && (
+          <WinnerScreen
+            gameState={gameState}
+            socketId={socket.id}
+            isHost={isHost}
+            onNewGame={handleNewGame}
           />
         )}
       </div>

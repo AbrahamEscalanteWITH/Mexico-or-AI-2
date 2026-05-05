@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 function VotingScreen({ gameState, onVote, socketId, isHost, playerName }) {
   const { question, timeLeft, hasVoted, status, questionNumber = 1, totalQuestions = 20, votes } = gameState;
   const userVoted = hasVoted.includes(socketId);
   const isReadingPhase = status === 'reading';
   const isUrgent = !isReadingPhase && timeLeft <= 5;
+  const myVote = gameState.socketVotes?.[socketId];
 
   const [revealedWords, setRevealedWords] = useState([]);
   const [showButtons, setShowButtons] = useState(false);
@@ -112,7 +114,26 @@ function VotingScreen({ gameState, onVote, socketId, isHost, playerName }) {
             </div>
           </div>
           {userVoted && (
-            <div className="vote-submitted">✓ &nbsp; Vote submitted — waiting for others...</div>
+            <div className="vote-submitted" style={{ marginTop: '1rem', position: 'relative' }}>
+              ✓ &nbsp; Vote submitted — waiting for others...
+              
+              {/* Lottie Animations based on vote */}
+              {myVote === 'mexico' && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '80%', maxWidth: '600px' }}>
+                    <DotLottieReact src="/lottie/mexico.lottie" autoplay />
+                  </div>
+                </div>
+              )}
+              
+              {myVote === 'ai' && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '80%', maxWidth: '600px' }}>
+                    <DotLottieReact src="/lottie/ai.lottie" autoplay />
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </>
       )}
