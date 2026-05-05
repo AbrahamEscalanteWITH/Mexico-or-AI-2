@@ -11,8 +11,17 @@ function VotingScreen({ gameState, onVote, socketId, isHost, playerName }) {
   const [revealedWords, setRevealedWords] = useState([]);
   const [showButtons, setShowButtons] = useState(false);
   const [lastQuestionId, setLastQuestionId] = useState(null);
+  const [hideVoteAnimation, setHideVoteAnimation] = useState(false);
 
   const words = question?.description ? question.description.split(' ') : [];
+
+  useEffect(() => {
+    if (userVoted) {
+      setHideVoteAnimation(false);
+      const t = setTimeout(() => setHideVoteAnimation(true), 2500);
+      return () => clearTimeout(t);
+    }
+  }, [userVoted]);
 
   useEffect(() => {
     if (!question) return;
@@ -118,7 +127,7 @@ function VotingScreen({ gameState, onVote, socketId, isHost, playerName }) {
               ✓ &nbsp; Vote submitted — waiting for others...
               
               {/* Lottie Animations based on vote */}
-              {myVote === 'mexico' && (
+              {myVote === 'mexico' && !hideVoteAnimation && (
                 <div style={{ position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ width: '80%', maxWidth: '600px' }}>
                     <DotLottieReact src="/lottie/mexico.lottie" autoplay />
@@ -126,7 +135,7 @@ function VotingScreen({ gameState, onVote, socketId, isHost, playerName }) {
                 </div>
               )}
               
-              {myVote === 'ai' && (
+              {myVote === 'ai' && !hideVoteAnimation && (
                 <div style={{ position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ width: '80%', maxWidth: '600px' }}>
                     <DotLottieReact src="/lottie/ai.lottie" autoplay />

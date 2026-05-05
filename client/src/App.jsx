@@ -318,6 +318,7 @@ function App() {
             onVideoPlay={() => duckBg(0.05)}
             onVideoEnd={() => duckBg(musicVol)}
             socketId={socket.id}
+            socket={socket}
           />
         )}
 

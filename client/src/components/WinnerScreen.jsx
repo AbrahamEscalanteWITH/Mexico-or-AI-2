@@ -19,11 +19,15 @@ function WinnerScreen({ gameState, socketId, isHost, onNewGame }) {
       
       {winners.length > 0 ? (
         <>
-          <div className="banner-strip" style={{ fontSize: '1.2rem', letterSpacing: '6px' }}>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <DotLottieReact src="/lottie/confetti.lottie" autoplay loop style={{ width: '100%', height: '100%' }} />
+          </div>
+
+          <div className="banner-strip" style={{ fontSize: '1.2rem', letterSpacing: '6px', position: 'relative', zIndex: 1 }}>
             ★ AND THE TRUTH MASTER IS... ★
           </div>
           
-          <div style={{ margin: '3rem 0' }}>
+          <div style={{ margin: '3rem 0', position: 'relative', zIndex: 1 }}>
             {winners.map(([id, score], idx) => {
               const name = playerNames[id];
               return (
@@ -60,6 +64,31 @@ function WinnerScreen({ gameState, socketId, isHost, onNewGame }) {
                 </div>
               );
             })}
+          </div>
+
+          {/* Show the rest of the players */}
+          <div style={{ marginTop: '2rem', position: 'relative', zIndex: 1 }}>
+            <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '1.5rem', color: 'rgba(255,255,255,0.7)', marginBottom: '1rem' }}>
+              Final Standings
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+              {leaderboard.filter(([, score]) => score !== topScore).map(([id, score], idx) => (
+                <div key={id} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  maxWidth: '300px',
+                  background: 'rgba(255,255,255,0.05)',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '4px',
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '1rem'
+                }}>
+                  <span style={{ fontWeight: 'bold' }}>{idx + 2}. {playerNames[id]}</span>
+                  <span style={{ color: 'var(--cyan-mexicano)' }}>{score} pts</span>
+                </div>
+              ))}
+            </div>
           </div>
         </>
       ) : (

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 
-function ResultsScreen({ gameState, isHost, onNext, onNewGame, onVideoPlay, onVideoEnd, socketId }) {
+function ResultsScreen({ gameState, isHost, onNext, onNewGame, onVideoPlay, onVideoEnd, socketId, socket }) {
   const { question, votes, scores = {}, playerNames = {}, questionNumber = 1, totalQuestions = 20 } = gameState;
   const totalVotes = votes.mexico + votes.ai;
   const mexicoPercent = totalVotes === 0 ? 50 : Math.round((votes.mexico / totalVotes) * 100);
@@ -8,11 +8,45 @@ function ResultsScreen({ gameState, isHost, onNext, onNewGame, onVideoPlay, onVi
   const isReal = !question.isAI;
   const myScore = scores[socketId] ?? 0;
   const medals = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣'];
+  
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (!isHost && socket) {
+      const handleVideoAction = ({ action, time }) => {
+        if (!videoRef.current) return;
+        if (action === 'play') {
+          videoRef.current.currentTime = time;
+          videoRef.current.play().catch(() => {});
+        } else if (action === 'pause') {
+          videoRef.current.currentTime = time;
+          videoRef.current.pause();
+        } else if (action === 'seek') {
+          videoRef.current.currentTime = time;
+        }
+      };
+      socket.on('videoAction', handleVideoAction);
+      return () => socket.off('videoAction', handleVideoAction);
+    }
+  }, [isHost, socket]);
+
+  const handleHostPlay = (e) => {
+    onVideoPlay();
+    if (isHost && socket) socket.emit('videoAction', { action: 'play', time: e.target.currentTime });
+  };
+
+  const handleHostPause = (e) => {
+    onVideoEnd();
+    if (isHost && socket) socket.emit('videoAction', { action: 'pause', time: e.target.currentTime });
+  };
+
+  const handleHostSeek = (e) => {
+    if (isHost && socket) socket.emit('videoAction', { action: 'seek', time: e.target.currentTime });
+  };
 
   const leaderboard = Object.entries(scores)
     .filter(([id]) => playerNames[id] && playerNames[id] !== 'Host')
-    .sort(([,a],[,b]) => b - a)
-    .slice(0, 8);
+    .sort(([,a],[,b]) => b - a);
 
   return (
     <div className="card fade-enter fade-enter-active">
@@ -37,13 +71,15 @@ function ResultsScreen({ gameState, isHost, onNext, onNewGame, onVideoPlay, onVi
       {question.video && (
         <div className="media-reveal" style={{ margin:'1.5rem 0' }}>
           <video
+            ref={videoRef}
             src={question.video}
             controls={isHost}
             autoPlay
             playsInline
-            onPlay={onVideoPlay}
+            onPlay={handleHostPlay}
+            onPause={handleHostPause}
             onEnded={onVideoEnd}
-            onPause={onVideoEnd}
+            onSeeked={handleHostSeek}
             style={{
               maxWidth:'100%', width:'100%', maxHeight:'460px', borderRadius:'4px',
               border:`4px solid ${isReal ? 'var(--rosa-mexicano)' : 'var(--cyan-mexicano)'}`,

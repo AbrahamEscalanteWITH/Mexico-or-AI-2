@@ -7,7 +7,7 @@ const questions = [
   },
   {
     id: 2,
-    description: "An epic, massive brawl erupts at the iconic Insurgentes roundabout as an army of Emos clashes with Punks.",
+    description: "An epic, massive brawl erupts as an army of Emos clashes with Punks.",
     isAI: false,
     video: '/media/EmosVSPunks.mp4'
   },
@@ -95,12 +95,12 @@ const questions = [
   },
   {
     id: 18,
-    description: "Harry Potter trying to order a magic potion but accidentally buying an exotic spicy salsa from a street vendor.",
+    description: "Harry Potter skating while carrying a brand-new TV in its box.",
     isAI: true
   },
   {
     id: 19,
-    description: "Kanye West spotted eating a street taco from a very small local stand in Mexico City while sitting right next to Mario Bros.",
+    description: "Kanye West spotted eating a street taco from a very small local stand in Mexico City while sitting right next to someone dressed as Mario Bros.",
     isAI: true
   },
   {

@@ -127,6 +127,8 @@ io.on('connection', (socket) => {
     totalQuestions: questionPool.length,
     scores: { ...gameState.scores },
     playerNames: { ...gameState.playerNames },
+    socketVotes: { ...gameState.socketVotes },
+    hasHost: !!gameState.hostId,
   });
 
   // Player registers their name (and optionally marks themselves as host)
@@ -141,6 +143,11 @@ io.on('connection', (socket) => {
       gameState.questionNumber = 1;
       startNextRound();
     }
+  });
+
+  socket.on('videoAction', (data) => {
+    // Broadcast video action to all clients EXCEPT the sender
+    socket.broadcast.emit('videoAction', data);
   });
 
   socket.on('revealComplete', () => {
