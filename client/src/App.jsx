@@ -17,7 +17,7 @@ function App() {
   const [playerName, setPlayerName] = useState('')
   const [nameInput, setNameInput] = useState('')
   const [hostPasswordInput, setHostPasswordInput] = useState('')
-  const [musicVol, setMusicVol] = useState(0.25)
+  const [musicVol, setMusicVol] = useState(0.15)
   const { playSfx, stopBg, fadeSfx } = useAudio()
   const prevStatusRef = useRef(null)
   const bgStarted = useRef(false)
@@ -129,7 +129,7 @@ function App() {
   const handleVolChange  = (e) => setMusicVol(parseFloat(e.target.value))
 
   // ── Host volume dial ──────────────────────────────────────────────────────
-  const VolumeDial = () => (
+  const renderVolumeDial = () => (
     <div style={{
       position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 10000,
       background: 'rgba(13,13,18,0.95)', border: '2px solid var(--rosa-mexicano)',
@@ -275,7 +275,7 @@ function App() {
   return (
     <>
       {/* Outside the animated container so position:fixed works */}
-      {isHost && <VolumeDial />}
+      {isHost && renderVolumeDial()}
 
       {gameState.status === 'revealing' && gameState.question && (
         <SplashReveal question={gameState.question} playSfx={playSfx} fadeSfx={fadeSfx} socket={socket} />

@@ -75,7 +75,7 @@ const questions = [
   },
   {
     id: 14,
-    description: "An elaborate quinceañera photoshoot interrupted when the birthday girl's dress gets caught on a passing garbage truck.",
+    description: "A quinceañera taking a ride on a garbage truck.",
     isAI: true
   },
   {
