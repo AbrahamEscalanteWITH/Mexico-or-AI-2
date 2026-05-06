@@ -4,6 +4,8 @@ import Lobby from './components/Lobby'
 import VotingScreen from './components/VotingScreen'
 import ResultsScreen from './components/ResultsScreen'
 import SplashReveal from './components/SplashReveal'
+import FinalPresenterReveal from './components/FinalPresenterReveal'
+import IntroReveal from './components/IntroReveal'
 import WinnerScreen from './components/WinnerScreen'
 import { useAudio } from './hooks/useAudio'
 import './App.css'
@@ -17,8 +19,7 @@ function App() {
   const [playerName, setPlayerName] = useState('')
   const [nameInput, setNameInput] = useState('')
   const [hostPasswordInput, setHostPasswordInput] = useState('')
-  const [musicVol, setMusicVol] = useState(0.15)
-  const { playSfx, stopBg, fadeSfx } = useAudio()
+  const { playSfx, stopBg, fadeSfx } = useAudio(gameState.globalMute)
   const prevStatusRef = useRef(null)
   const bgStarted = useRef(false)
   const bgAudioRef = useRef(null)
@@ -28,21 +29,23 @@ function App() {
     return () => { socket.off('gameState') }
   }, [])
 
-  // Sync dial → bgAudio
+
+
   useEffect(() => {
-    if (bgAudioRef.current) bgAudioRef.current.volume = musicVol
-  }, [musicVol])
+    if (bgAudioRef.current) bgAudioRef.current.muted = gameState.globalMute
+  }, [gameState.globalMute])
 
   const duckBg = (volume) => {
     if (bgAudioRef.current) bgAudioRef.current.volume = volume
   }
 
-  const startBg = (vol = musicVol) => {
+  const startBg = (vol = 0.1) => {
     if (!bgStarted.current) {
       bgStarted.current = true
       const bg = new Audio('/audio/Fondo General.mp3')
       bg.loop = true
       bg.volume = vol
+      bg.muted = gameState.globalMute
       bg.play().catch(() => {})
       bgAudioRef.current = bg
     }
@@ -57,15 +60,14 @@ function App() {
     if ((curr === 'reading' || curr === 'voting') && prev !== 'reading' && prev !== 'voting') {
       if (bgAudioRef.current) { bgAudioRef.current.pause(); bgAudioRef.current = null }
       bgStarted.current = false
-      playSfx('/audio/Cara a Cara.mp3', 0.9)
-      setTimeout(() => {
-        const bg = new Audio('/audio/Fondo General.mp3')
-        bg.loop = true
-        bg.volume = musicVol
-        bg.play().catch(() => {})
-        bgAudioRef.current = bg
-        bgStarted.current = true
-      }, 2000)
+      
+      const bg = new Audio('/audio/Cara a Cara.mp3')
+      bg.loop = false // Play it once for the question duration
+      bg.volume = 0.1 // 10% volume
+      bg.muted = gameState.globalMute
+      bg.play().catch(() => {})
+      bgAudioRef.current = bg
+      bgStarted.current = true
     }
 
     if (curr === 'revealing') {
@@ -78,10 +80,15 @@ function App() {
       startBg()
     }
 
+    if (curr === 'winner_reveal' || curr === 'intro') {
+      if (bgAudioRef.current) bgAudioRef.current.pause()
+      bgStarted.current = false
+    }
+
     if (curr === 'game_over' && prev !== 'game_over') {
       if (bgAudioRef.current) bgAudioRef.current.pause()
       bgStarted.current = false
-      playSfx('/audio/Tema del Ganador.mp3', 1.0)
+      playSfx('/audio/Tema del Ganador.mp3', 0.1)
       
       // Resume background music after 44 seconds
       setTimeout(() => {
@@ -122,11 +129,10 @@ function App() {
     setRole('player')
   }
 
-  const handleStartGame  = () => { playSfx('/audio/Sting Principal.mp3', 1.0); socket.emit('startGame') }
-  const handleNewGame    = () => { playSfx('/audio/Sting Principal.mp3', 1.0); socket.emit('resetGame') }
-  const handleNextQuestion = () => { if (bgAudioRef.current) bgAudioRef.current.volume = musicVol; socket.emit('nextQuestion') }
+  const handleStartGame  = () => { playSfx('/audio/Sting Principal.mp3', 0.2); socket.emit('startGame') }
+  const handleNewGame    = () => { playSfx('/audio/Sting Principal.mp3', 0.2); socket.emit('resetGame') }
+  const handleNextQuestion = () => { if (bgAudioRef.current) bgAudioRef.current.volume = 0.1; socket.emit('nextQuestion') }
   const handleVote       = (voteType) => socket.emit('vote', voteType)
-  const handleVolChange  = (e) => setMusicVol(parseFloat(e.target.value))
 
   // ── Host volume dial ──────────────────────────────────────────────────────
   const renderVolumeDial = () => (
@@ -137,14 +143,23 @@ function App() {
       flexDirection: 'column', alignItems: 'center', gap: '0.3rem',
       backdropFilter: 'blur(8px)', boxShadow: '0 0 20px rgba(228,0,124,0.25)', minWidth: '130px',
     }}>
-      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.65rem', letterSpacing: '4px', color: 'var(--amarillo-brillante)', opacity: 0.8 }}>
-        🎚 MUSIC VOL
-      </span>
-      <input id="vol-slider" type="range" min="0" max="1" step="0.01" value={musicVol} onChange={handleVolChange}
-        style={{ width: '100%', accentColor: 'var(--rosa-mexicano)', cursor: 'pointer' }} />
-      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.8rem', letterSpacing: '2px', color: 'var(--cyan-mexicano)' }}>
-        {Math.round(musicVol * 100)}%
-      </span>
+      <button 
+        onClick={() => socket.emit('toggleMute', !gameState.globalMute)} 
+        style={{ 
+          background: gameState.globalMute ? 'rgba(228,0,124,0.3)' : 'transparent', 
+          border: '1px solid var(--rosa-mexicano)', 
+          borderRadius: '4px',
+          color: 'var(--amarillo-brillante)', 
+          cursor: 'pointer', 
+          marginTop: '5px',
+          padding: '4px 8px',
+          fontFamily: "'Bebas Neue', sans-serif",
+          letterSpacing: '2px',
+          fontSize: '0.7rem'
+        }}
+      >
+        {gameState.globalMute ? '🔇 UNMUTE ALL' : '🔊 MUTE ALL'}
+      </button>
     </div>
   )
 
@@ -281,6 +296,20 @@ function App() {
         <SplashReveal question={gameState.question} playSfx={playSfx} fadeSfx={fadeSfx} socket={socket} />
       )}
 
+      {gameState.status === 'intro' && (
+        <IntroReveal
+          socket={socket}
+          isHost={isHost}
+        />
+      )}
+
+      {gameState.status === 'winner_reveal' && (
+        <FinalPresenterReveal
+          socket={socket}
+          isHost={isHost}
+        />
+      )}
+
       <div className="app-container fade-enter fade-enter-active">
         <Header showHostBadge={isHost} />
 
@@ -306,6 +335,7 @@ function App() {
             socketId={socket.id}
             isHost={isHost}
             playerName={playerName}
+            playSfx={playSfx}
           />
         )}
 
@@ -321,6 +351,8 @@ function App() {
             socket={socket}
           />
         )}
+
+
 
         {gameState.status === 'game_over' && (
           <WinnerScreen

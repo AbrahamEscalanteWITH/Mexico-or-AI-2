@@ -13,8 +13,14 @@ function getAudio(src) {
 /**
  * useAudio — returns helpers to play/stop sounds
  */
-export function useAudio() {
+export function useAudio(isMuted = false) {
   const bgRef = useRef(null);
+
+  useEffect(() => {
+    if (bgRef.current) {
+      bgRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
 
   const playBg = useCallback((src, volume = 0.4) => {
     // Stop current bg if different
@@ -25,9 +31,10 @@ export function useAudio() {
     const audio = getAudio(src);
     audio.loop = true;
     audio.volume = volume;
+    audio.muted = isMuted;
     bgRef.current = audio;
     audio.play().catch(() => {}); // ignore autoplay block
-  }, []);
+  }, [isMuted]);
 
   const stopBg = useCallback(() => {
     if (bgRef.current) {

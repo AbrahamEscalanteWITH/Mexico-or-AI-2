@@ -44,6 +44,15 @@ function ResultsScreen({ gameState, isHost, onNext, onNewGame, onVideoPlay, onVi
     if (isHost && socket) socket.emit('videoAction', { action: 'seek', time: e.target.currentTime });
   };
 
+  const handleVideoLoaded = () => {
+    if (videoRef.current) {
+      videoRef.current.volume = 0.5;
+      if (videoRef.current.duration < 10) {
+        videoRef.current.loop = true;
+      }
+    }
+  };
+
   const leaderboard = Object.entries(scores)
     .filter(([id]) => playerNames[id] && playerNames[id] !== 'Host')
     .sort(([,a],[,b]) => b - a);
@@ -80,6 +89,7 @@ function ResultsScreen({ gameState, isHost, onNext, onNewGame, onVideoPlay, onVi
             onPause={handleHostPause}
             onEnded={onVideoEnd}
             onSeeked={handleHostSeek}
+            onLoadedMetadata={handleVideoLoaded}
             style={{
               maxWidth:'100%', width:'100%', maxHeight:'460px', borderRadius:'4px',
               border:`4px solid ${isReal ? 'var(--rosa-mexicano)' : 'var(--cyan-mexicano)'}`,

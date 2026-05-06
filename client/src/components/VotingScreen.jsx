@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
-function VotingScreen({ gameState, onVote, socketId, isHost, playerName }) {
+function VotingScreen({ gameState, onVote, socketId, isHost, playerName, playSfx }) {
   const { question, timeLeft, hasVoted, status, questionNumber = 1, totalQuestions = 20, votes } = gameState;
   const userVoted = hasVoted.includes(socketId);
   const isReadingPhase = status === 'reading';
@@ -14,6 +14,12 @@ function VotingScreen({ gameState, onVote, socketId, isHost, playerName }) {
   const [hideVoteAnimation, setHideVoteAnimation] = useState(false);
 
   const words = question?.description ? question.description.split(' ') : [];
+
+  useEffect(() => {
+    if (showButtons && timeLeft === 6) {
+      if (playSfx) playSfx('/audio/Countdown.wav', 0.2);
+    }
+  }, [timeLeft, showButtons, playSfx]);
 
   useEffect(() => {
     if (userVoted) {
@@ -45,30 +51,51 @@ function VotingScreen({ gameState, onVote, socketId, isHost, playerName }) {
 
   return (
     <div className="card fade-enter fade-enter-active">
+      {/* Big background countdown */}
+      {showButtons && timeLeft <= 6 && timeLeft > 0 && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '80vh',
+          fontFamily: "'Bebas Neue', sans-serif",
+          color: 'var(--rosa-mexicano)',
+          opacity: 0.1,
+          pointerEvents: 'none',
+          zIndex: 0,
+          lineHeight: 1,
+          textShadow: '0 0 50px rgba(228,0,124,0.5)'
+        }}>
+          {timeLeft}
+        </div>
+      )}
 
-      {/* Question counter */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.75rem', letterSpacing: '5px', color: 'var(--cyan-mexicano)', opacity: 0.7 }}>
-          QUESTION {questionNumber} / {totalQuestions}
-        </span>
-        {isHost && (
-          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.7rem', letterSpacing: '3px', color: 'var(--amarillo-brillante)', background: 'rgba(228,0,124,0.15)', border: '1px solid var(--rosa-mexicano)', borderRadius: '4px', padding: '2px 8px' }}>
-            👑 HOST VIEW
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        {/* Question counter */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+          <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.75rem', letterSpacing: '5px', color: 'var(--cyan-mexicano)', opacity: 0.7 }}>
+            QUESTION {questionNumber} / {totalQuestions}
           </span>
-        )}
-      </div>
+          {isHost && (
+            <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '0.7rem', letterSpacing: '3px', color: 'var(--amarillo-brillante)', background: 'rgba(228,0,124,0.15)', border: '1px solid var(--rosa-mexicano)', borderRadius: '4px', padding: '2px 8px' }}>
+              👑 HOST VIEW
+            </span>
+          )}
+        </div>
 
-      {/* Timer */}
-      <div className="timer-wrapper" style={{
-        transition: 'opacity 0.8s ease, transform 0.8s ease',
-        opacity: isReadingPhase ? 0 : 1,
-        transform: isReadingPhase ? 'translateY(-10px)' : 'translateY(0)',
-        pointerEvents: isReadingPhase ? 'none' : 'auto',
-        marginBottom: isReadingPhase ? '-4rem' : '0',
-      }}>
-        <span className={`timer${isUrgent ? ' warning' : ''}`}>{String(timeLeft).padStart(2, '0')}</span>
-        <span className="timer-label">SECONDS</span>
-      </div>
+        {/* Timer */}
+        <div className="timer-wrapper" style={{
+          transition: 'opacity 0.8s ease, transform 0.8s ease',
+          opacity: isReadingPhase ? 0 : 1,
+          transform: isReadingPhase ? 'translateY(-10px)' : 'translateY(0)',
+          pointerEvents: isReadingPhase ? 'none' : 'auto',
+          marginBottom: isReadingPhase ? '-4rem' : '0',
+        }}>
+          <span className={`timer${isUrgent ? ' warning' : ''}`}>{String(timeLeft).padStart(2, '0')}</span>
+          <span className="timer-label">SECONDS</span>
+        </div>
 
       <div className="event-intro-label">● LIVE &nbsp;—&nbsp; EVENT</div>
 
@@ -146,6 +173,7 @@ function VotingScreen({ gameState, onVote, socketId, isHost, playerName }) {
           )}
         </>
       )}
+      </div>
     </div>
   );
 }

@@ -4,11 +4,17 @@ function SplashReveal({ question, playSfx, fadeSfx, socket }) {
   const isReal = !question.isAI;
   const videoRef = useRef(null);
 
+  const handleVideoLoaded = () => {
+    if (videoRef.current) {
+      videoRef.current.volume = 0.5;
+    }
+  };
+
   useEffect(() => {
     if (isReal) {
-      playSfx('/audio/Sting del Ganador.mp3', 0.6); // Lowered volume to prevent clipping
+      playSfx('/audio/Sting del Ganador.mp3', 0.2); // 20%
     } else {
-      playSfx('/audio/Objetivo Alcanzado.mp3', 0.8);
+      playSfx('/audio/Objetivo Alcanzado.mp3', 0.2); // 20%
     }
   }, []);
 
@@ -36,6 +42,7 @@ function SplashReveal({ question, playSfx, fadeSfx, socket }) {
           autoPlay
           playsInline
           onEnded={handleVideoEnded}
+          onLoadedMetadata={handleVideoLoaded}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
         <style>{`

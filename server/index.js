@@ -38,6 +38,7 @@ let gameState = {
   playerNames: {},   // { socketId: string }
   hostId: null,      // socket ID of the host
   questionNumber: 0,
+  globalMute: false,
 };
 
 let timerInterval;
@@ -54,6 +55,7 @@ function broadcastState() {
     playerNames: { ...gameState.playerNames },
     socketVotes: { ...gameState.socketVotes },
     hasHost: !!gameState.hostId,
+    globalMute: gameState.globalMute,
   };
   io.emit('gameState', stateToSend);
 }
@@ -140,9 +142,21 @@ io.on('connection', (socket) => {
 
   socket.on('startGame', () => {
     if (gameState.status === 'waiting') {
+      gameState.status = 'intro';
+      broadcastState();
+    }
+  });
+
+  socket.on('finishIntro', () => {
+    if (gameState.status === 'intro') {
       gameState.questionNumber = 1;
       startNextRound();
     }
+  });
+
+  socket.on('toggleMute', (isMuted) => {
+    gameState.globalMute = isMuted;
+    broadcastState();
   });
 
   socket.on('videoAction', (data) => {
@@ -155,15 +169,22 @@ io.on('connection', (socket) => {
   });
 
   socket.on('nextQuestion', () => {
-    if (gameState.status === 'results') {
-      if (gameState.questionNumber >= 20) {
-        gameState.status = 'game_over';
-        broadcastState();
-      } else {
-        gameState.currentQuestionIndex = (gameState.currentQuestionIndex + 1) % questionPool.length;
-        gameState.questionNumber += 1;
-        startNextRound();
-      }
+    if (gameState.status !== 'results') return;
+    
+    if (gameState.questionNumber >= 20) {
+      gameState.status = 'winner_reveal';
+      broadcastState();
+    } else {
+      gameState.currentQuestionIndex = (gameState.currentQuestionIndex + 1) % questionPool.length;
+      gameState.questionNumber += 1;
+      startNextRound();
+    }
+  });
+
+  socket.on('finishWinnerReveal', () => {
+    if (gameState.status === 'winner_reveal') {
+      gameState.status = 'game_over';
+      broadcastState();
     }
   });
 
