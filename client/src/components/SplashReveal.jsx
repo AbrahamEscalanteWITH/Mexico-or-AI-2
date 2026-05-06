@@ -42,6 +42,7 @@ function SplashReveal({ question, playSfx, fadeSfx, socket }) {
           autoPlay
           playsInline
           onEnded={handleVideoEnded}
+          onError={handleVideoEnded}
           onLoadedMetadata={handleVideoLoaded}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
