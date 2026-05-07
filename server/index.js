@@ -109,12 +109,7 @@ function endRound() {
   gameState.status = 'revealing';
   broadcastState();
 
-  if (currentQ.isAI) {
-    revealTimeout = setTimeout(advanceToResults, 4000);
-  } else {
-    // Mexico video: client fires 'revealComplete'; 20s safety fallback
-    revealTimeout = setTimeout(advanceToResults, 20000);
-  }
+  revealTimeout = setTimeout(advanceToResults, 4000);
 }
 
 io.on('connection', (socket) => {
