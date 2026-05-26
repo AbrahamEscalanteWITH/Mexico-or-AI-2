@@ -1,0 +1,58 @@
+{
+  "name": "gsap",
+  "version": "3.12.5",
+  "description": "GSAP (GreenSock Animation Platform) - Club edition",
+  "main": "src/index.js",
+  "module": "esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./esm/index.js",
+      "require": "./umd/gsap.min.js"
+    },
+    "./ScrollTrigger": {
+      "import": "./esm/ScrollTrigger.js",
+      "require": "./umd/ScrollTrigger.min.js"
+    },
+    "./ScrollSmoother": {
+      "import": "./esm/ScrollSmoother.js"
+    },
+    "./Flip": {
+      "import": "./esm/Flip.js"
+    },
+    "./Draggable": {
+      "import": "./esm/Draggable.js"
+    },
+    "./SplitText": {
+      "import": "./esm/SplitText.js"
+    },
+    "./CustomEase": {
+      "import": "./esm/CustomEase.js"
+    },
+    "./EasePack": {
+      "import": "./esm/EasePack.js"
+    },
+    "./MorphSVGPlugin": {
+      "import": "./esm/MorphSVGPlugin.js"
+    },
+    "./TextPlugin": {
+      "import": "./esm/TextPlugin.js"
+    },
+    "./DrawSVGPlugin": {
+      "import": "./esm/DrawSVGPlugin.js"
+    },
+    "./MotionPathPlugin": {
+      "import": "./esm/MotionPathPlugin.js"
+    },
+    "./ScrambleTextPlugin": {
+      "import": "./esm/ScrambleTextPlugin.js"
+    },
+    "./Observer": {
+      "import": "./esm/Observer.js"
+    },
+    "./InertiaPlugin": {
+      "import": "./esm/InertiaPlugin.js"
+    }
+  },
+  "sideEffects": false,
+  "license": "Standard GSAP License"
+}

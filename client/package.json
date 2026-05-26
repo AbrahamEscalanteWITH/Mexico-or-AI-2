@@ -10,7 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@lottiefiles/dotlottie-react": "^0.19.1",
+    "@rive-app/react-canvas": "^4.28.4",
+    "gsap": "file:../gsap-public",
     "lottie-web": "^5.13.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",

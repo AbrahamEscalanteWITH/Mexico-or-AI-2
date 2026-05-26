@@ -1,4 +1,8 @@
 import React, { useRef } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(useGSAP);
 
 function FinalPresenterReveal({ socket, isHost }) {
   const videoRef = useRef(null);
@@ -15,8 +19,14 @@ function FinalPresenterReveal({ socket, isHost }) {
     }
   };
 
+  const container = useRef();
+  
+  useGSAP(() => {
+    gsap.from(container.current, { opacity: 0, duration: 0.5, ease: "power2.out" });
+  }, { scope: container });
+
   return (
-    <div style={{
+    <div ref={container} style={{
       position: 'fixed',
       inset: 0,
       zIndex: 9999,
@@ -24,7 +34,6 @@ function FinalPresenterReveal({ socket, isHost }) {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      animation: 'splashIn 0.2s ease-out',
       overflow: 'hidden',
     }}>
       <video
@@ -37,9 +46,6 @@ function FinalPresenterReveal({ socket, isHost }) {
         onLoadedMetadata={handleVideoLoaded}
         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
       />
-      <style>{`
-        @keyframes splashIn { from { opacity: 0; } to { opacity: 1; } }
-      `}</style>
     </div>
   );
 }

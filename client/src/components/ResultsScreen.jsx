@@ -1,4 +1,9 @@
 import React, { useRef, useEffect } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { SplitText } from 'gsap/SplitText';
+
+gsap.registerPlugin(useGSAP, SplitText);
 
 function ResultsScreen({ gameState, isHost, onNext, onNewGame, onVideoPlay, onVideoEnd, socketId, socket }) {
   const { question, votes, scores = {}, playerNames = {}, questionNumber = 1, totalQuestions = 20 } = gameState;
@@ -10,6 +15,52 @@ function ResultsScreen({ gameState, isHost, onNext, onNewGame, onVideoPlay, onVi
   const medals = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣'];
   
   const videoRef = useRef(null);
+  const container = useRef();
+  const titleRef = useRef();
+  const bannerRef = useRef();
+  const mediaRef = useRef();
+  const barMexRef = useRef();
+  const barAiRef = useRef();
+
+  useGSAP(() => {
+    const tl = gsap.timeline();
+
+    gsap.set(barMexRef.current, { width: 0 });
+    gsap.set(barAiRef.current, { width: 0 });
+    if (mediaRef.current) gsap.set(mediaRef.current, { opacity: 0, y: 30, scale: 0.95 });
+    
+    let splitTitle = null;
+    if (titleRef.current) {
+      splitTitle = new SplitText(titleRef.current, { type: "words,chars" });
+      gsap.set(splitTitle.chars, { opacity: 0, y: 15, scale: 0.9 });
+    }
+
+    if (splitTitle) {
+      tl.to(splitTitle.chars, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.4,
+        stagger: 0.03,
+        ease: "back.out(1.5)"
+      });
+    }
+
+    if (bannerRef.current) {
+      tl.fromTo(bannerRef.current, 
+        { opacity: 0, scaleX: 0 },
+        { opacity: 1, scaleX: 1, duration: 0.4, ease: "power2.out" }, "-=0.2"
+      );
+    }
+
+    if (mediaRef.current) {
+      tl.to(mediaRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, "-=0.2");
+    }
+
+    tl.to(barMexRef.current, { width: `${mexicoPercent}%`, duration: 1.2, ease: "power3.out" }, "-=0.1")
+      .to(barAiRef.current, { width: `${aiPercent}%`, duration: 1.2, ease: "power3.out" }, "<");
+      
+  }, { scope: container, dependencies: [mexicoPercent, aiPercent] });
 
   useEffect(() => {
     if (!isHost && socket) {
@@ -58,7 +109,7 @@ function ResultsScreen({ gameState, isHost, onNext, onNewGame, onVideoPlay, onVi
     .sort(([,a],[,b]) => b - a);
 
   return (
-    <div className="card fade-enter fade-enter-active">
+    <div ref={container} className="card fade-enter fade-enter-active">
 
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.5rem' }}>
         <span style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:'0.8rem', letterSpacing:'4px', color:'var(--cyan-mexicano)', opacity:0.8 }}>
@@ -71,14 +122,14 @@ function ResultsScreen({ gameState, isHost, onNext, onNewGame, onVideoPlay, onVi
         )}
       </div>
 
-      <h2>The Verdict is In!</h2>
+      <h2 ref={titleRef}>The Verdict is In!</h2>
 
-      <div className="banner-strip" style={{ background: isReal ? 'var(--rosa-mexicano)' : 'var(--azul-retro)', fontSize:'1rem', letterSpacing:'6px' }}>
+      <div ref={bannerRef} className="banner-strip" style={{ background: isReal ? 'var(--rosa-mexicano)' : 'var(--azul-retro)', fontSize:'1rem', letterSpacing:'6px' }}>
         {isReal ? '★ THIS REALLY HAPPENED IN MEXICO ★' : '★ THIS WAS AI GENERATED ★'}
       </div>
 
       {question.video && (
-        <div className="media-reveal" style={{ margin:'1.5rem 0' }}>
+        <div ref={mediaRef} style={{ margin:'1.5rem 0' }}>
           <video
             ref={videoRef}
             src={question.video}
@@ -105,8 +156,8 @@ function ResultsScreen({ gameState, isHost, onNext, onNewGame, onVideoPlay, onVi
       </p>
 
       <div className="results-scale">
-        <div className="scale-mexico" style={{ width:`${mexicoPercent}%` }} />
-        <div className="scale-ai"     style={{ width:`${aiPercent}%` }} />
+        <div ref={barMexRef} className="scale-mexico" style={{ width: '0%' }} />
+        <div ref={barAiRef} className="scale-ai"     style={{ width: '0%' }} />
       </div>
       <div className="scale-labels">
         <span style={{ color:'var(--rosa-mexicano)' }}>🇲🇽 Mexico &nbsp;{mexicoPercent}%</span>

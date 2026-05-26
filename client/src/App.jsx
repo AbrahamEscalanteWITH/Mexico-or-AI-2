@@ -176,7 +176,7 @@ function App() {
   // ── 1. Role selection ─────────────────────────────────────────────────────
   if (role === 'unassigned') {
     return (
-      <div className="app-container fade-enter fade-enter-active">
+      <div className="app-container">
         <Header />
         <div className="card">
           <h2>How are you playing?</h2>
@@ -200,7 +200,7 @@ function App() {
   // ── Host Authentication ───────────────────────────────────────────────────
   if (role === 'host-auth') {
     return (
-      <div className="app-container fade-enter fade-enter-active">
+      <div className="app-container">
         <Header />
         <div className="card">
           <h2>Host Authentication</h2>
@@ -243,7 +243,7 @@ function App() {
   // ── 2. Player name entry ──────────────────────────────────────────────────
   if (role === 'naming') {
     return (
-      <div className="app-container fade-enter fade-enter-active">
+      <div className="app-container">
         <Header />
         <div className="card">
           <h2>What's your name?</h2>
@@ -310,7 +310,7 @@ function App() {
         />
       )}
 
-      <div className="app-container fade-enter fade-enter-active">
+      <div className="app-container">
         <Header showHostBadge={isHost} />
 
         {gameState.status === 'connecting' && (
@@ -346,7 +346,7 @@ function App() {
             onNext={handleNextQuestion}
             onNewGame={handleNewGame}
             onVideoPlay={() => duckBg(0.05)}
-            onVideoEnd={() => duckBg(musicVol)}
+            onVideoEnd={() => duckBg(0.1)}
             socketId={socket.id}
             socket={socket}
           />
